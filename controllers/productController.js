@@ -12,6 +12,7 @@ const addProduct = async (req, res) => {
       sizes,
       bestseller,
     } = req.body;
+
     const image1 = req.files.image1 && req.files.image1[0];
     const image2 = req.files.image2 && req.files.image2[0];
     const image3 = req.files.image3 && req.files.image3[0];
@@ -36,28 +37,50 @@ const addProduct = async (req, res) => {
       category,
       price: Number(price),
       subCategory,
-      bestseller: bestseller === true ? true : false,
+      bestseller: JSON.parse(bestseller) === true ? true : false,
       sizes: JSON.parse(sizes),
       image: imagesUrl,
       date: Date.now(),
     };
 
     const product = new productModel(productData);
-    console.log(productData);
+    await product.save();
 
-    res.json({});
+    res.json({ success: true, message: "Product Added" });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
 };
 
 // Function for list product
-const listProducts = async (req, res) => {};
+const listProducts = async (req, res) => {
+  try {
+    const products = await productModel.find();
+    res.json({ success: true, message: "Product List", data: products });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
 
 // Function for remove product
-const removeProduct = async (req, res) => {};
+const removeProduct = async (req, res) => {
+  try {
+    await productModel.findByIdAndDelete(req.body.id);
+    res.json({ success: true, message: "Product Deleted" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
 
 // Function for single product info
-const singleProduct = async (req, res) => {};
+const singleProduct = async (req, res) => {
+  try {
+    const { productId } = req.body;
+    const product = await productModel.findById(productId);
+    res.json({ success: true, message: "Product Data", data: product });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
 
 export { listProducts, addProduct, removeProduct, singleProduct };
